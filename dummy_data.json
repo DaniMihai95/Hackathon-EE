@@ -1,0 +1,61 @@
+{
+  "patient": {
+    "full_name": "Michael Aaron Reynolds",
+    "id": "PT-20251101-9275",
+    "age": 47,
+    "gender": "Male",
+    "date_of_birth": "1978-06-14",
+    "admission_date": "2025-10-31T11:45:00Z",
+    "current_status": "In operation — ongoing",
+    "room_number": "OR-2B",
+    "primary_diagnosis": "Abdominal aortic aneurysm",
+    "secondary_conditions": ["Hypertension", "Hyperlipidemia"],
+    "time_until_next_feedback": "30 minutes remaining in procedure",
+    "doctor_notes": "Patient under general anesthesia. Procedure progressing as planned. Estimated completion in 30 minutes. Vitals stable, minor blood loss observed but within normal range.",
+    "time_full_operation_to_be_done": "2025-11-01T11:30:00Z",
+    "assigned_doctor": {
+      "name": "Dr. Elena Vasquez",
+      "department": "Vascular Surgery",
+      "contact": "e.vasquez@cityhospital.org"
+    },
+    "anesthesiologist": {
+      "name": "Dr. Liam Patel",
+      "contact": "l.patel@cityhospital.org"
+    },
+    "metrics": {
+      "heart_rate_bpm": 86,
+      "blood_pressure_mmHg": "118/75",
+      "oxygen_saturation_percent": 99,
+      "body_temperature_celsius": 36.8,
+      "respiratory_rate_bpm": 14,
+      "anesthesia_depth": "Moderate — stable",
+      "medicine_taken": [
+        {
+          "name": "Propofol",
+          "dosage": "100 mg/hr (IV infusion)",
+          "status": "Active",
+          "last_adjusted": "2025-11-01T10:40:00Z"
+        },
+        {
+          "name": "Fentanyl",
+          "dosage": "50 mcg IV",
+          "status": "Administered",
+          "last_administered": "2025-11-01T10:50:00Z"
+        },
+        {
+          "name": "Cefazolin",
+          "dosage": "2 g IV",
+          "status": "Prophylactic — completed",
+          "last_administered": "2025-11-01T09:50:00Z"
+        }
+      ],
+      "blood_loss_ml": 240,
+      "urine_output_ml": 400,
+      "fluid_administered_ml": 1600
+    },
+    "next_checkup": {
+      "scheduled_time": "2025-11-01T11:30:00Z",
+      "type": "Post-operative recovery evaluation"
+    }
+  }
+}
