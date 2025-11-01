@@ -25,16 +25,13 @@ if 'logged_in' not in st.session_state:
 
 # Login page
 if not st.session_state.logged_in:
+    # Hide everything and show only login
     st.markdown("""
     <style>
-    .login-container {
-        max-width: 400px;
-        margin: 100px auto;
-        padding: 2rem;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
+    /* Hide default Streamlit elements on login page */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
     
@@ -56,6 +53,7 @@ if not st.session_state.logged_in:
                 else:
                     st.error("Invalid username or password")
         
+        st.info("💡 Demo credentials:\n\nUsername: `admin`\n\nPassword: `password123`")
     
     st.stop()  # Stop execution here if not logged in
 
