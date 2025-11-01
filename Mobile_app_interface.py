@@ -7,14 +7,60 @@ import requests
 import streamlit as st
 
 
+
+
 st.set_page_config(
     page_title="Patient Monitor",
     page_icon="🏥",
     layout="wide"
 )
 
+# Dummy credentials
+VALID_USERNAME = "admin"
+VALID_PASSWORD = "password123"
+
+# Initialize session state for login
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+# Login page
+if not st.session_state.logged_in:
+    st.markdown("""
+    <style>
+    .login-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        st.markdown("# 🏥 Patient Monitor")
+        st.markdown("### Login")
+        
+        with st.form("login_form"):
+            username = st.text_input("Username", placeholder="Enter username")
+            password = st.text_input("Password", type="password", placeholder="Enter password")
+            submit = st.form_submit_button("Login", use_container_width=True)
+            
+            if submit:
+                if username == VALID_USERNAME and password == VALID_PASSWORD:
+                    st.session_state.logged_in = True
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password")
+        
+    
+    st.stop()  # Stop execution here if not logged in
+
 # Mock condition variable (should be fetched from API)
-cond = "COOKED"
+cond = "stable"
 
 # Map condition to phase class
 phase_class = {
