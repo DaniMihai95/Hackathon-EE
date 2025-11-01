@@ -1,6 +1,8 @@
 import os
 import time
 import random
+import json
+import glob
 from datetime import datetime
 from dateutil import tz
 import requests
@@ -19,9 +21,11 @@ st.set_page_config(
 VALID_USERNAME = "admin"
 VALID_PASSWORD = "password123"
 
-# Initialize session state for login
+# Initialize session state
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
+if 'selected_patient' not in st.session_state:
+    st.session_state.selected_patient = None
 
 # Login page
 if not st.session_state.logged_in:
@@ -56,6 +60,62 @@ if not st.session_state.logged_in:
         st.info("💡 Demo credentials:\n\nUsername: `admin`\n\nPassword: `password123`")
     
     st.stop()  # Stop execution here if not logged in
+
+# Patient selection page
+if st.session_state.selected_patient is None:
+    st.markdown("# 🏥 Select Patient")
+    st.markdown("---")
+    
+    # Load all patient JSON files
+    patient_files = glob.glob("PT-*.json")
+    patients = []
+    
+    for file in patient_files:
+        try:
+            with open(file, 'r') as f:
+                data = json.load(f)
+                patients.append(data['patient'])
+        except:
+            pass
+    
+    if not patients:
+        st.error("No patient data found.")
+        st.stop()
+    
+    # Display patients in columns (3 per row)
+    cols_per_row = 3
+    for i in range(0, len(patients), cols_per_row):
+        cols = st.columns(cols_per_row)
+        for j, col in enumerate(cols):
+            if i + j < len(patients):
+                patient = patients[i + j]
+                with col:
+                    st.markdown(f"""
+                    <div style='
+                        background: white;
+                        padding: 1.5rem;
+                        border-radius: 10px;
+                        border-left: 4px solid #0066cc;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        margin-bottom: 1rem;
+                        min-height: 220px;
+                    '>
+                        <h3 style='margin: 0 0 0.5rem 0; color: #0066cc;'>{patient['full_name']}</h3>
+                        <p style='margin: 0.25rem 0; color: #666;'><strong>ID:</strong> {patient['id']}</p>
+                        <p style='margin: 0.25rem 0; color: #666;'><strong>Age:</strong> {patient['age']}</p>
+                        <p style='margin: 0.25rem 0; color: #666;'><strong>Room:</strong> {patient['room_number']}</p>
+                        <p style='margin: 0.25rem 0; color: #666;'><strong>Diagnosis:</strong> {patient['primary_diagnosis']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    if st.button(f"View Patient", key=f"btn_{patient['id']}", use_container_width=True):
+                        st.session_state.selected_patient = patient
+                        st.rerun()
+    
+    st.stop()  # Stop execution here if no patient selected
+
+# Get selected patient data
+selected_patient = st.session_state.selected_patient
 
 # Mock condition variable (should be fetched from API)
 cond = "stable"
@@ -109,6 +169,13 @@ def _local_t(iso_str):
 if 'prev_vitals' not in st.session_state:
     st.session_state.prev_vitals = None
 
+# Add back button outside the loop
+if st.button("← Back to Patients"):
+    st.session_state.selected_patient = None
+    st.rerun()
+
+st.markdown("---")
+
 # Placeholder for dynamic content that updates
 placeholder = st.empty()
 
@@ -136,8 +203,8 @@ while True:
     st.session_state.prev_vitals = current_vitals.copy()
     
     status = {
-        "patient": {"name": "Patient Name"},
-        "summary": "Patient is in stable condition",
+        "patient": {"name": selected_patient['full_name']},
+        "summary": selected_patient.get('doctor_notes', 'No notes available'),
         "last_update": datetime.now().isoformat(),
         "vitals": current_vitals,
         "feed": []
@@ -150,7 +217,8 @@ while True:
             st.markdown(f"<div class='card {phase_class}'>", unsafe_allow_html=True)
             st.subheader(f"{status['patient']['name']}")
             st.write(f"**Condition:** `{cond.upper()}`")
-            st.write(status.get("summary", ""))
+            st.write(f"**Room:** {selected_patient['room_number']}")
+            st.write(f"**Diagnosis:** {selected_patient['primary_diagnosis']}")
             st.write(f"<span class='muted'>Last update: {_local_t(status.get('last_update',''))}</span>", unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 

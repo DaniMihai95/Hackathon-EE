@@ -1,0 +1,63 @@
+{
+  "patient": {
+    "full_name": "James Wilson",
+    "id": "PT-20251101-3456",
+    "password": "james54",
+    "age": 71,
+    "gender": "Male",
+    "date_of_birth": "1954-05-20",
+    "admission_date": "2025-10-28T09:15:00Z",
+    "current_status": "Stable - Rehabilitation",
+    "room_number": "312",
+    "primary_diagnosis": "Hip replacement surgery",
+    "secondary_conditions": ["Osteoarthritis", "Osteoporosis"],
+    "time_until_next_feedback": "4 hours",
+    "doctor_notes": "Patient recovering well from total hip replacement. Physical therapy progressing. Pain well controlled. Expected discharge in 3-4 days.",
+    "time_full_operation_to_be_done": null,
+    "assigned_doctor": {
+      "name": "Dr. Michael Rodriguez",
+      "department": "Orthopedic Surgery",
+      "contact": "m.rodriguez@cityhospital.org"
+    },
+    "anesthesiologist": {
+      "name": "Dr. Patricia Green",
+      "contact": "p.green@cityhospital.org"
+    },
+    "metrics": {
+      "heart_rate_bpm": 74,
+      "blood_pressure_mmHg": "132/78",
+      "oxygen_saturation_percent": 96,
+      "body_temperature_celsius": 36.9,
+      "respiratory_rate_bpm": 14,
+      "anesthesia_depth": "N/A - Awake",
+      "medicine_taken": [
+        {
+          "name": "Acetaminophen",
+          "dosage": "1000 mg PO",
+          "status": "Every 6 hours",
+          "last_administered": "2025-11-01T10:00:00Z"
+        },
+        {
+          "name": "Enoxaparin",
+          "dosage": "40 mg SC",
+          "status": "Daily - DVT prophylaxis",
+          "last_administered": "2025-11-01T08:00:00Z"
+        },
+        {
+          "name": "Calcium + Vitamin D",
+          "dosage": "500 mg/400 IU PO",
+          "status": "Daily",
+          "last_administered": "2025-11-01T08:00:00Z"
+        }
+      ],
+      "blood_loss_ml": 380,
+      "urine_output_ml": 1200,
+      "fluid_administered_ml": 3200
+    },
+    "next_checkup": {
+      "scheduled_time": "2025-11-01T17:00:00Z",
+      "type": "Physical therapy session"
+    }
+  }
+}
+
