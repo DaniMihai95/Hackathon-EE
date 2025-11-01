@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # Mock condition variable (should be fetched from API)
-cond = "stable"
+cond = "COOKED"
 
 # Map condition to phase class
 phase_class = {
@@ -61,17 +61,41 @@ def _local_t(iso_str):
     except:
         return iso_str
 
+# Initialize session state for previous values
+if 'prev_vitals' not in st.session_state:
+    st.session_state.prev_vitals = None
+
 # Placeholder for dynamic content that updates
 placeholder = st.empty()
 
 # Continuous loop for live updates
 while True:
     # Generate fresh vitals on every iteration for real-time updates
+    current_vitals = generate_vitals()
+    
+    # Calculate deltas (changes from previous values)
+    deltas = {}
+    if st.session_state.prev_vitals:
+        try:
+            deltas['HR'] = int(current_vitals['HR']) - int(st.session_state.prev_vitals['HR'])
+            deltas['SpO2'] = int(current_vitals['SpO2']) - int(st.session_state.prev_vitals['SpO2'])
+            deltas['Temp'] = round(float(current_vitals['Temp']) - float(st.session_state.prev_vitals['Temp']), 1)
+            deltas['Resp'] = int(current_vitals['Resp']) - int(st.session_state.prev_vitals['Resp'])
+            # For BP, we'll track systolic only
+            current_sys = int(current_vitals['BP'].split('/')[0])
+            prev_sys = int(st.session_state.prev_vitals['BP'].split('/')[0])
+            deltas['BP'] = current_sys - prev_sys
+        except:
+            deltas = {}
+    
+    # Update previous vitals for next iteration
+    st.session_state.prev_vitals = current_vitals.copy()
+    
     status = {
         "patient": {"name": "Patient Name"},
         "summary": "Patient is in stable condition",
         "last_update": datetime.now().isoformat(),
-        "vitals": generate_vitals(),  # Generate NEW values each time
+        "vitals": current_vitals,
         "feed": []
     }
     
@@ -90,12 +114,12 @@ while True:
             st.markdown("#### Vitals")
             vit = status.get("vitals", {})
             m1, m2, m3 = st.columns(3)
-            m1.metric("Heart rate", f"{vit.get('HR','–')}", "bpm")
-            m2.metric("SpO₂", f"{vit.get('SpO2','–')}", "%")
-            m3.metric("Temperature", f"{vit.get('Temp','–')}°C")
+            m1.metric("Heart rate", f"{vit.get('HR','–')} bpm", delta=deltas.get('HR', None), delta_color="off")
+            m2.metric("SpO₂", f"{vit.get('SpO2','–')}%", delta=deltas.get('SpO2', None), delta_color="off")
+            m3.metric("Temperature", f"{vit.get('Temp','–')}°C", delta=deltas.get('Temp', None), delta_color="off")
             m4, m5 = st.columns(2)
-            m4.metric("Respiratory rate", f"{vit.get('Resp','–')}/min")
-            m5.metric("Blood pressure", f"{vit.get('BP','–')}")
+            m4.metric("Respiratory rate", f"{vit.get('Resp','–')}/min", delta=deltas.get('Resp', None), delta_color="off")
+            m5.metric("Blood pressure", f"{vit.get('BP','–')}", delta=deltas.get('BP', None), delta_color="off")
             st.markdown("</div>", unsafe_allow_html=True)
 
         with c2:
