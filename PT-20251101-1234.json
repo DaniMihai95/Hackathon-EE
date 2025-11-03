@@ -1,0 +1,57 @@
+{
+  "patient": {
+    "full_name": "Emma Martinez",
+    "id": "PT-20251101-1234",
+    "password": "emma2025",
+    "age": 34,
+    "gender": "Female",
+    "date_of_birth": "1991-03-22",
+    "admission_date": "2025-11-01T08:30:00Z",
+    "current_status": "Stable - Post-operative",
+    "room_number": "204",
+    "primary_diagnosis": "Appendectomy",
+    "secondary_conditions": ["Mild hypertension"],
+    "time_until_next_feedback": "2 hours",
+    "doctor_notes": "Patient recovering well from emergency appendectomy. Pain managed with medication. Expected discharge in 24-48 hours.",
+    "time_full_operation_to_be_done": null,
+    "assigned_doctor": {
+      "name": "Dr. Sarah Chen",
+      "department": "General Surgery",
+      "contact": "s.chen@cityhospital.org"
+    },
+    "anesthesiologist": {
+      "name": "Dr. Marcus Williams",
+      "contact": "m.williams@cityhospital.org"
+    },
+    "metrics": {
+      "heart_rate_bpm": 78,
+      "blood_pressure_mmHg": "128/82",
+      "oxygen_saturation_percent": 97,
+      "body_temperature_celsius": 37.2,
+      "respiratory_rate_bpm": 16,
+      "anesthesia_depth": "N/A - Awake",
+      "medicine_taken": [
+        {
+          "name": "Morphine",
+          "dosage": "5 mg IV",
+          "status": "Administered",
+          "last_administered": "2025-11-01T12:00:00Z"
+        },
+        {
+          "name": "Ondansetron",
+          "dosage": "4 mg IV",
+          "status": "Administered",
+          "last_administered": "2025-11-01T11:30:00Z"
+        }
+      ],
+      "blood_loss_ml": 150,
+      "urine_output_ml": 320,
+      "fluid_administered_ml": 1200
+    },
+    "next_checkup": {
+      "scheduled_time": "2025-11-01T16:00:00Z",
+      "type": "Post-operative wound check"
+    }
+  }
+}
+

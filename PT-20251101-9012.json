@@ -1,0 +1,57 @@
+{
+  "patient": {
+    "full_name": "Sophia Anderson",
+    "id": "PT-20251101-9012",
+    "password": "sophia97",
+    "age": 28,
+    "gender": "Female",
+    "date_of_birth": "1997-12-08",
+    "admission_date": "2025-11-01T06:00:00Z",
+    "current_status": "In labor - Active",
+    "room_number": "L&D-5",
+    "primary_diagnosis": "Full-term pregnancy in active labor",
+    "secondary_conditions": [],
+    "time_until_next_feedback": "Continuous monitoring",
+    "doctor_notes": "Patient at 39 weeks gestation, cervix dilated to 6cm. Contractions regular. Epidural placed. Mother and baby vitals stable.",
+    "time_full_operation_to_be_done": "2025-11-01T18:00:00Z",
+    "assigned_doctor": {
+      "name": "Dr. Lisa Park",
+      "department": "Obstetrics",
+      "contact": "l.park@cityhospital.org"
+    },
+    "anesthesiologist": {
+      "name": "Dr. Ahmed Hassan",
+      "contact": "a.hassan@cityhospital.org"
+    },
+    "metrics": {
+      "heart_rate_bpm": 88,
+      "blood_pressure_mmHg": "118/72",
+      "oxygen_saturation_percent": 99,
+      "body_temperature_celsius": 37.0,
+      "respiratory_rate_bpm": 16,
+      "anesthesia_depth": "Epidural - Effective",
+      "medicine_taken": [
+        {
+          "name": "Epidural anesthesia",
+          "dosage": "Continuous infusion",
+          "status": "Active",
+          "last_adjusted": "2025-11-01T10:30:00Z"
+        },
+        {
+          "name": "Oxytocin",
+          "dosage": "2 mU/min IV",
+          "status": "Active - Labor augmentation",
+          "last_adjusted": "2025-11-01T12:00:00Z"
+        }
+      ],
+      "blood_loss_ml": 0,
+      "urine_output_ml": 240,
+      "fluid_administered_ml": 1800
+    },
+    "next_checkup": {
+      "scheduled_time": "2025-11-01T14:30:00Z",
+      "type": "Cervical dilation check"
+    }
+  }
+}
+
