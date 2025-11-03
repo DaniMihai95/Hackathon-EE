@@ -3,12 +3,75 @@ import time
 import random
 import json
 import glob
+import ssl
+import uuid
 from datetime import datetime
 from dateutil import tz
 import requests
 import streamlit as st
+import paho.mqtt.client as mqtt
 
 
+# MQTT Functions
+def _mqtt_client():
+    """Connect once and reuse the client from session_state."""
+    if "mqtt_client" in st.session_state:
+        return st.session_state["mqtt_client"]
+
+    # Use the custom MQTT broker from screenshot
+    host = "77.172.166.178"
+    port = 51234
+
+    # Create client with unique ID
+    client = mqtt.Client(client_id=f"st-pub-{uuid.uuid4()}", clean_session=True)
+
+    # Connection callback
+    def on_connect(c, u, flags, rc):
+        st.session_state["mqtt_connected"] = (rc == 0)
+        if rc == 0:
+            st.session_state["mqtt_status"] = "Connected"
+        else:
+            st.session_state["mqtt_status"] = f"Connection failed: {rc}"
+    
+    client.on_connect = on_connect
+
+    # Connect to broker
+    try:
+        client.connect(host, port, keepalive=60)
+        client.loop_start()
+        
+        # Wait for connection
+        for _ in range(30):
+            if st.session_state.get("mqtt_connected"):
+                break
+            time.sleep(0.1)
+    except Exception as e:
+        st.session_state["mqtt_status"] = f"Connection error: {e}"
+        return None
+
+    st.session_state["mqtt_client"] = client
+    return client
+
+def publish_doctor_message(patient_id: str, text: str):
+    """Publish message to hackathon/patient1/bpm topic."""
+    # Use the topic format from screenshot: hackathon/patient1
+    topic = f"hackathon/{patient_id}"
+    
+    # Create payload as JSON
+    payload = {
+        "patient_id": patient_id,
+        "role": "doctor",
+        "text": text,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    c = _mqtt_client()
+    if c is None:
+        return None
+    
+    # Publish with QoS 0 (fire and forget)
+    info = c.publish(topic, json.dumps(payload), qos=0, retain=False)
+    return info
 
 
 st.set_page_config(
@@ -26,6 +89,8 @@ if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 if 'selected_patient' not in st.session_state:
     st.session_state.selected_patient = None
+if 'patient_messages' not in st.session_state:
+    st.session_state.patient_messages = {}
 
 # Login page
 if not st.session_state.logged_in:
@@ -179,6 +244,32 @@ st.markdown("---")
 # Placeholder for dynamic content that updates
 placeholder = st.empty()
 
+# Placeholder for the comment form (separate from the updating content)
+comment_placeholder = st.empty()
+
+# Add doctor comment form (outside loop to avoid duplicate widget error)
+with comment_placeholder.container():
+    st.markdown("### 💬 Send Update to Patient")
+    with st.form("doctor_message_form", clear_on_submit=True):
+        doctor_message = st.text_area("Doctor's message:", placeholder="Enter update for the patient...", height=100)
+        submit_msg = st.form_submit_button("Send Update", use_container_width=True)
+        
+        if submit_msg and doctor_message.strip():
+            patient_id = selected_patient['id']
+            new_message = {
+                'time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'message': doctor_message.strip()
+            }
+            st.session_state.patient_messages[patient_id].append(new_message)
+            
+            # Publish message to MQTT broker
+            try:
+                publish_doctor_message(patient_id, doctor_message.strip())
+            except Exception as e:
+                st.error(f"Failed to publish to MQTT: {e}")
+            
+            st.rerun()
+
 # Continuous loop for live updates
 while True:
     # Generate fresh vitals on every iteration for real-time updates
@@ -233,18 +324,62 @@ while True:
             m4.metric("Respiratory rate", f"{vit.get('Resp','–')}/min", delta=deltas.get('Resp', None), delta_color="off")
             m5.metric("Blood pressure", f"{vit.get('BP','–')}", delta=deltas.get('BP', None), delta_color="off")
             st.markdown("</div>", unsafe_allow_html=True)
+            
+            # Medications Section
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
+            st.markdown("#### 💊 Current Medications")
+            medications = selected_patient.get('metrics', {}).get('medicine_taken', [])
+            
+            if not medications:
+                st.write("No medications recorded.")
+            else:
+                for med in medications:
+                    med_name = med.get('name', 'Unknown')
+                    dosage = med.get('dosage', 'N/A')
+                    status = med.get('status', 'N/A')
+                    last_admin = med.get('last_administered', '')
+                    
+                    # Format last administered time
+                    if last_admin:
+                        try:
+                            last_time = _local_t(last_admin)
+                        except:
+                            last_time = last_admin
+                    else:
+                        last_time = "N/A"
+                    
+                    st.markdown(f"""
+                    <div style='background: #f8f9fa; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; border-left: 3px solid #28a745;'>
+                        <strong style='color: #212529; font-size: 1.1rem;'>{med_name}</strong><br>
+                        <span style='color: #6c757d;'>📋 <strong>Dosage:</strong> {dosage}</span><br>
+                        <span style='color: #6c757d;'>⏱️ <strong>Schedule:</strong> {status}</span><br>
+                        <span style='color: #6c757d;'>🕐 <strong>Last Given:</strong> {last_time}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
         with c2:
             st.markdown("<div class='card'>", unsafe_allow_html=True)
             st.markdown("#### Care Team Updates")
-            feed = status.get("feed", [])
+            
+            # Get patient-specific messages
+            patient_id = selected_patient['id']
+            if patient_id not in st.session_state.patient_messages:
+                st.session_state.patient_messages[patient_id] = []
+            
+            feed = st.session_state.patient_messages[patient_id]
+            
             if not feed:
                 st.write("No updates yet.")
             else:
                 for item in feed:
-                    with st.container():
-                        st.write(f"**{_local_t(item.get('ts',''))}** — {item.get('text','')}")
-            st.markdown("<hr>", unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div style='background: #f8f9fa; padding: 0.75rem; border-radius: 8px; margin-bottom: 0.5rem; border: 1px solid #dee2e6;'>
+                        <strong style='color: #0066cc;'>{item['time']}</strong> <span style='color: #212529;'>— {item['message']}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            st.markdown("<hr style='margin: 1rem 0;'>", unsafe_allow_html=True)
             st.caption("These updates are informational only. For urgent questions, contact the care team directly.")
             st.markdown("</div>", unsafe_allow_html=True)
     
